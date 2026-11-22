@@ -1,0 +1,12 @@
+[options]
+mode prove
+
+[engines]
+smtbmc z3
+
+[script]
+read_verilog -sv -formal counter.sv
+prep -top counter
+
+[files]
+counter.sv

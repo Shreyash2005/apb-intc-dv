@@ -1,0 +1,4 @@
+obj_dir/
+formal/*/
+*.vcd
+*.fst
