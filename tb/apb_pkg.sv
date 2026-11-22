@@ -5,4 +5,5 @@ package apb_pkg;
   `include "apb_item.sv"
   typedef uvm_sequencer #(apb_item) apb_sequencer;   // the outbox, no custom code needed
   `include "apb_driver.sv"
+  `include "apb_monitor.sv"
 endpackage
