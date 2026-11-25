@@ -1,0 +1,21 @@
+================ BUG_CLR_WINS ================
+SIM    : CAUGHT in 3 run(s): race_test/seed=1 rand_test/seed=3 rand_test/seed=9 
+         first error: [SB_IRQ] cycle 26: irq=0, expected 1 (model pend=00000001 en=11111111)
+FORMAL : CAUGHT by apb_intc_props.svh line 46:
+                   if ($past(rise[f_i]))
+                     assert (pend_q[f_i]);
+================ BUG_PRIO ================
+SIM    : CAUGHT in 10 run(s): rand_test/seed=1 rand_test/seed=2 rand_test/seed=3 rand_test/seed=4 rand_test/seed=5 rand_test/seed=6 rand_test/seed=7 rand_test/seed=8 rand_test/seed=9 rand_test/seed=10 
+         first error: [SB_READ] cycle 111: read 0x014 got 0x80000005, expected 0x80000000
+FORMAL : CAUGHT by apb_intc_props.svh line 69:
+                 assert (active[id_idx]);                               // that source is active
+                 assert ((active & ((1 << id_idx) - 1)) == '0);         // nothing below it is
+================ BUG_NO_STRB ================
+SIM    : CAUGHT in 7 run(s): rand_test/seed=1 rand_test/seed=2 rand_test/seed=3 rand_test/seed=4 rand_test/seed=8 rand_test/seed=9 rand_test/seed=10 
+         first error: [SB_IRQ] cycle 292: irq=0, expected 1 (model pend=10110011 en=11000000)
+FORMAL : CAUGHT by apb_intc_props.svh line 91:
+               if ($past(wr) && $past(paddr) == A_MODE)
+                 assert (mode_q == ($past(pstrb[0]) ? $past(pwdata[N_SRC-1:0]) : $past(mode_q)));
+================ restoring clean build ================
+Building... (about 40 s, output goes to build.log)
+BUILD OK
