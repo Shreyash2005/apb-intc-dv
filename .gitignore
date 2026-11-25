@@ -6,3 +6,4 @@ build.log
 logs/
 scratch/
 bug_logs/
+third_party/
