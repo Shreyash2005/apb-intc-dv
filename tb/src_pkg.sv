@@ -6,4 +6,5 @@ package src_pkg;
   `include "src_driver.sv"
   `include "src_monitor.sv"
   `include "src_agent.sv"
+  `include "src_seqs.sv"
 endpackage

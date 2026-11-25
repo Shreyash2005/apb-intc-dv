@@ -47,3 +47,38 @@ class apb_smoke_seq extends apb_base_seq;
     if (e !== 1'b1) `uvm_error("SEQ", "no PSLVERR on bad address")
   endtask
 endclass
+
+// configure: write EN and MODE
+class apb_cfg_seq extends apb_base_seq;
+  `uvm_object_utils(apb_cfg_seq)
+  rand bit [7:0] en;
+  rand bit [7:0] mode;
+
+  function new(string name = "apb_cfg_seq");
+    super.new(name);
+  endfunction
+
+  task body();
+    do_write(12'h004, {24'h0, en});
+    do_write(12'h008, {24'h0, mode});
+  endtask
+endclass
+
+// mini interrupt handler: read ID, clear that source's PEND bit
+class apb_isr_seq extends apb_base_seq;
+  `uvm_object_utils(apb_isr_seq)
+  function new(string name = "apb_isr_seq");
+    super.new(name);
+  endfunction
+
+  task body();
+    bit [31:0] d;
+    bit        e;
+    do_read(12'h014, d, e);                       // who interrupted?
+    if (d[31]) begin
+      `uvm_info("ISR", $sformatf("servicing source %0d", d[4:0]), UVM_LOW)
+      do_write(12'h00C, 32'h1 << d[4:0]);         // W1C that PEND bit
+    end else
+      `uvm_info("ISR", "no interrupt pending", UVM_LOW)
+  endtask
+endclass
