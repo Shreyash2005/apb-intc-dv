@@ -82,3 +82,41 @@ class apb_isr_seq extends apb_base_seq;
       `uvm_info("ISR", "no interrupt pending", UVM_LOW)
   endtask
 endclass
+
+// random CPU traffic: random accesses, interrupt servicing, config changes
+class apb_rand_seq extends apb_base_seq;
+  `uvm_object_utils(apb_rand_seq)
+  int unsigned n = 100;            // number of operations
+
+  function new(string name = "apb_rand_seq");
+    super.new(name);
+  endfunction
+
+  task body();
+    repeat (n) begin
+      case ($urandom_range(0, 9))
+        0, 1, 2, 3: rand_access();                              // 40% random read/write
+        4, 5, 6:    service();                                  // 30% act like the ISR
+        7, 8:       do_write(12'h004, $urandom_range(0, 255));  // 20% new EN
+        default:    do_write(12'h008, $urandom_range(0, 255));  // 10% new MODE
+      endcase
+    end
+  endtask
+
+  // fully random transfer within the item's constraints; strobe off 10% of the time
+  task rand_access();
+    apb_item tr = apb_item::type_id::create("tr");
+    start_item(tr);
+    if (!tr.randomize()) `uvm_fatal("RAND", "rand_access randomize failed")
+    if ($urandom_range(0, 9) == 0) tr.strb = 4'h0;
+    finish_item(tr);
+  endtask
+
+  // read ID; if something is pending, clear it
+  task service();
+    bit [31:0] d;
+    bit        e;
+    do_read(12'h014, d, e);
+    if (d[31]) do_write(12'h00C, 32'h1 << d[4:0]);
+  endtask
+endclass

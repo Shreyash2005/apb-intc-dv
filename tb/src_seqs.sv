@@ -31,3 +31,26 @@ class src_pulse_seq extends src_base_seq;
     drive(8'h00, 1);          // back to low
   endtask
 endclass
+
+// random device activity: quiet periods, single sources, bursts of several
+class src_rand_seq extends src_base_seq;
+  `uvm_object_utils(src_rand_seq)
+  int unsigned n = 100;            // number of items
+
+  function new(string name = "src_rand_seq");
+    super.new(name);
+  endfunction
+
+  task body();
+    bit [7:0] v;
+    repeat (n) begin
+      case ($urandom_range(0, 9))
+        0, 1, 2, 3: v = 8'h00;                          // 40% quiet
+        4, 5, 6, 7: v = 8'(1 << $urandom_range(0, 7));  // 40% one source high
+        default:    v = 8'($urandom);                   // 20% several at once
+      endcase
+      drive(v, $urandom_range(1, 8));                   // hold 1..8 cycles
+    end
+    drive(8'h00, 1);                                    // end quiet
+  endtask
+endclass

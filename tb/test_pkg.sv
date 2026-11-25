@@ -6,4 +6,6 @@ package test_pkg;
   import env_pkg::*;
   `include "agent_test.sv"
   `include "intr_test.sv"
+  `include "intc_base_test.sv"
+  `include "rand_test.sv"
 endpackage
