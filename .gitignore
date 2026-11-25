@@ -4,3 +4,4 @@ formal/*/
 *.fst
 build.log
 logs/
+scratch/

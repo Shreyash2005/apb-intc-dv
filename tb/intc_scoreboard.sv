@@ -6,8 +6,9 @@ class intc_scoreboard extends uvm_scoreboard;
   uvm_tlm_analysis_fifo #(apb_item) apb_fifo;
   uvm_tlm_analysis_fifo #(src_item) src_fifo;
 
-  intc_model   model;
-  int unsigned n_cycles, n_reads, n_writes, n_errors;
+  intc_model    model;
+  intc_coverage cov;                                             // COV
+  int unsigned  n_cycles, n_reads, n_writes, n_errors;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -19,6 +20,7 @@ class intc_scoreboard extends uvm_scoreboard;
     src_fifo = new("src_fifo", this);
     model    = new();
     model.reset();
+    cov      = new();                                            // COV
   endfunction
 
   // one source sample arrives per clock edge; use it as the cycle tick
@@ -73,7 +75,10 @@ class intc_scoreboard extends uvm_scoreboard;
       end
     end
 
-    // 3. UPDATE the model with this edge's inputs
+    // 3. SAMPLE coverage with the state BEFORE this edge          // COV
+    cov.sample(model, s, has_apb, a);                              // COV
+
+    // 4. UPDATE the model with this edge's inputs
     model.step(s.value, wr, addr, data, strb);
   endfunction
 
@@ -90,5 +95,6 @@ class intc_scoreboard extends uvm_scoreboard;
       `uvm_info("SB", "SCOREBOARD PASSED", UVM_LOW)
     else
       `uvm_error("SB", "SCOREBOARD FAILED")
+    cov.report();                                                  // COV
   endfunction
 endclass
