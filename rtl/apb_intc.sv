@@ -122,4 +122,9 @@ module apb_intc #(
   assign pready  = 1'b1;
   assign pslverr = acc & ~addr_ok;
 
+
+`ifdef FORMAL
+  `include "apb_intc_props.svh"
+`endif
+
 endmodule
