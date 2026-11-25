@@ -1,9 +1,9 @@
-// intr_test.sv : configure, fire one interrupt, service it like a CPU
+// intr_test.sv : configure, fire one interrupt, service it like a CPU.
+// Checking is done by the scoreboard inside the env.
 class intr_test extends uvm_test;
   `uvm_component_utils(intr_test)
 
-  apb_agent apb_agt;
-  src_agent src_agt;
+  intc_env env;
 
   function new(string name, uvm_component parent);
     super.new(name, parent);
@@ -11,8 +11,7 @@ class intr_test extends uvm_test;
 
   function void build_phase(uvm_phase phase);
     super.build_phase(phase);
-    apb_agt = apb_agent::type_id::create("apb_agt", this);
-    src_agt = src_agent::type_id::create("src_agt", this);
+    env = intc_env::type_id::create("env", this);
   endfunction
 
   task run_phase(uvm_phase phase);
@@ -23,11 +22,11 @@ class intr_test extends uvm_test;
     phase.raise_objection(this);
     cfg.en   = 8'h08;              // 1. CPU: enable source 3, edge mode
     cfg.mode = 8'h08;
-    cfg.start(apb_agt.sqr);
+    cfg.start(env.apb_agt.sqr);
     pulse.idx = 3;                 // 2. device: pulse source 3
-    pulse.start(src_agt.sqr);
+    pulse.start(env.src_agt.sqr);
     #30;                           //    let irq rise
-    isr.start(apb_agt.sqr);        // 3. CPU: read ID, clear PEND
+    isr.start(env.apb_agt.sqr);    // 3. CPU: read ID, clear PEND
     #30;                           //    let irq fall
     phase.drop_objection(this);
   endtask

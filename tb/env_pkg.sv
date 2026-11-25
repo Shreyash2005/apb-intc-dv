@@ -5,4 +5,5 @@ package env_pkg;
   import src_pkg::*;
   `include "intc_model.sv"
   `include "intc_scoreboard.sv"
+  `include "intc_env.sv"
 endpackage
