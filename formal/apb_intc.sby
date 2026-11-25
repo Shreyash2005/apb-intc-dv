@@ -1,18 +1,25 @@
 [tasks]
 prove
 cover
+bug_clr_wins
+bug_prio
+bug_no_strb
 
 [options]
-prove: mode prove
-prove: depth 20
 cover: mode cover
 cover: depth 20
+~cover: mode prove
+~cover: depth 20
 
 [engines]
 smtbmc z3
 
 [script]
-read_verilog -sv -formal -DFORMAL apb_intc.sv
+prove:        read_verilog -sv -formal -DFORMAL apb_intc.sv
+cover:        read_verilog -sv -formal -DFORMAL apb_intc.sv
+bug_clr_wins: read_verilog -sv -formal -DFORMAL -DBUG_CLR_WINS apb_intc.sv
+bug_prio:     read_verilog -sv -formal -DFORMAL -DBUG_PRIO apb_intc.sv
+bug_no_strb:  read_verilog -sv -formal -DFORMAL -DBUG_NO_STRB apb_intc.sv
 prep -top apb_intc
 
 [files]

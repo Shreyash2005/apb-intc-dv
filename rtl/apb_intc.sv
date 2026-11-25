@@ -1,5 +1,9 @@
-
 // apb_intc.sv : APB4 interrupt controller, N_SRC sources (N_SRC <= 32)
+//
+// Bug injection (for verification experiments only, never defined normally):
+//   BUG_CLR_WINS : a W1C beats a same cycle rising edge (spec: edge wins)
+//   BUG_PRIO     : picker reports the HIGHEST active source (spec: lowest)
+//   BUG_NO_STRB  : PSTRB ignored, every write lands
 module apb_intc #(
   parameter int N_SRC = 8
 ) (
@@ -51,7 +55,11 @@ module apb_intc #(
   logic [31:0] wmask32;
   /* verilator lint_on UNUSEDSIGNAL */
   assign wmask32 = {{8{pstrb[3]}}, {8{pstrb[2]}}, {8{pstrb[1]}}, {8{pstrb[0]}}};
+`ifdef BUG_NO_STRB
+  assign wmask   = '1;                                              // BUG: PSTRB ignored
+`else
   assign wmask   = wmask32[N_SRC-1:0];
+`endif
 
   // ---------------- state (flops) ----------------
   logic [N_SRC-1:0] src_q, en_q, mode_q, pend_q;
@@ -75,7 +83,11 @@ module apb_intc #(
       if (wr && paddr == A_MODE)
         mode_q <= (mode_q & ~wmask) | (pwdata[N_SRC-1:0] & wmask);
       for (int i = 0; i < N_SRC; i++) begin
+`ifdef BUG_CLR_WINS
+        if (mode_q[i]) pend_q[i] <= (pend_q[i] | rise[i]) & ~clr[i];  // BUG: clear wins
+`else
         if (mode_q[i]) pend_q[i] <= (pend_q[i] & ~clr[i]) | rise[i];  // edge: set wins
+`endif
         else           pend_q[i] <= src_i[i];                         // level: copy wire
       end
     end
@@ -94,7 +106,11 @@ module apb_intc #(
   always_comb begin
     id_valid = 1'b0;
     id_idx   = '0;
+`ifdef BUG_PRIO
+    for (int i = 0; i < N_SRC; i++) begin      // BUG: scan low to high, last hit = HIGHEST
+`else
     for (int i = N_SRC-1; i >= 0; i--) begin   // scan high to low, last hit = lowest
+`endif
       if (active[i]) begin
         id_valid = 1'b1;
         id_idx   = 5'(i);
@@ -121,7 +137,6 @@ module apb_intc #(
   // ---------------- bus response ----------------
   assign pready  = 1'b1;
   assign pslverr = acc & ~addr_ok;
-
 
 `ifdef FORMAL
   `include "apb_intc_props.svh"

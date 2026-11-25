@@ -1,12 +1,14 @@
 #!/usr/bin/env bash
-# regress.sh : build once, run directed tests + rand_test over many seeds,
-# report pass/fail and merged coverage.   Usage: SEEDS=20 ./scripts/regress.sh
+# regress.sh [verilator args] : build once, run directed tests + rand_test over
+# many seeds, report pass/fail and merged coverage.
+#   SEEDS=20 ./scripts/regress.sh
+#   ./scripts/regress.sh +define+BUG_PRIO        (inject a bug)
 set -e
 cd "$(dirname "$0")/.."
 command -v z3 >/dev/null || { echo "z3 not found: run 'source ~/eda/oss-cad-suite/environment' first"; exit 1; }
 SEEDS="${SEEDS:-10}"
 
-./scripts/build.sh
+./scripts/build.sh "$@"
 rm -rf logs && mkdir -p logs
 pass=0
 fail=0
