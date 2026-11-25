@@ -120,3 +120,18 @@ class apb_rand_seq extends apb_base_seq;
     if (d[31]) do_write(12'h00C, 32'h1 << d[4:0]);
   endtask
 endclass
+
+// one write, address and data set by the test
+class apb_write_seq extends apb_base_seq;
+  `uvm_object_utils(apb_write_seq)
+  bit [11:0] addr;
+  bit [31:0] data;
+
+  function new(string name = "apb_write_seq");
+    super.new(name);
+  endfunction
+
+  task body();
+    do_write(addr, data);
+  endtask
+endclass

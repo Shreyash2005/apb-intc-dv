@@ -8,4 +8,5 @@ package test_pkg;
   `include "intr_test.sv"
   `include "intc_base_test.sv"
   `include "rand_test.sv"
+  `include "race_test.sv"
 endpackage

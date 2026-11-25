@@ -54,3 +54,20 @@ class src_rand_seq extends src_base_seq;
     drive(8'h00, 1);                                    // end quiet
   endtask
 endclass
+
+// 'lead' cycles low, then a 1 cycle rise on source idx, then low
+class src_race_seq extends src_base_seq;
+  `uvm_object_utils(src_race_seq)
+  int unsigned idx;
+  int unsigned lead;               // 0, 1 or 2 cycles of low before the rise
+
+  function new(string name = "src_race_seq");
+    super.new(name);
+  endfunction
+
+  task body();
+    if (lead > 0) drive(8'h00, lead);
+    drive(8'(1 << idx), 1);
+    drive(8'h00, 1);
+  endtask
+endclass
